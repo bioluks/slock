@@ -239,7 +239,7 @@ usboff(void) {
 
   // For this method to work alter your /etc/sudoers:
   // [username] [hostname] =NOPASSWD:
-  // /sbin/sysctl kernel.kernel.deny_new_usb=1
+  // /sbin/sysctl kernel.deny_new_usb=1
   system("sudo -n sysctl kernel.deny_new_usb=1 2> /dev/null"); /* FOR THIS TO WORK YOU NEED linux-hardened KERNEL (and active in use)! */
 #if STRICT_USBOFF
   system("sudo -n sysctl kernel.grsecurity.grsec_lock=1 2> /dev/null"); /* The GRSECURITY Kernel does not exist anymore! */
