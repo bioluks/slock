@@ -25,19 +25,19 @@
 #include <bsd_auth.h>
 #endif
 
-#include "imgur.h"
-#include "twilio.h"
+#include "imgur_example.h"
+#include "twilio_example.h"
 
 #define CMD_LENGTH 500
 
 #define POWEROFF 1
 #define USBOFF 1
 #define STRICT_USBOFF 0
-#define TWILIO_SEND 1
+#define TWILIO_SEND 0
 #define WEBCAM_SHOT 1
 #define IMGUR_UPLOAD 0
 #define PLAY_AUDIO 1
-#define TRANSPARENT 1
+#define TRANSPARENT 0
 
 char *g_pw = NULL;
 int lock_tries = 0;
@@ -220,8 +220,9 @@ poweroff(void) {
   // Needs sudo privileges - alter your /etc/sudoers file:
   // systemd: [username] [hostname] =NOPASSWD: /usr/bin/systemctl poweroff
   // sysvinit: [username] [hostname] =NOPASSWD: /usr/bin/shutdown -h now
-  system("sudo -n systemctl poweroff 2> /dev/null");
-  system("sudo -n shutdown -h now 2> /dev/null");
+  //system("sudo -n systemctl poweroff 2> /dev/null");
+  //system("sudo -n shutdown -h now 2> /dev/null");
+  system("loginctl poweroff 2> /dev/null"); /* elogind */
 #else
   return;
 #endif
@@ -234,9 +235,14 @@ usboff(void) {
   // Needs sudo privileges - alter your /etc/sudoers file:
   // [username] [hostname] =NOPASSWD:
   // /sbin/sysctl kernel.grsecurity.deny_new_usb=1
-  system("sudo -n sysctl kernel.grsecurity.deny_new_usb=1 2> /dev/null");
+  //system("sudo -n sysctl kernel.grsecurity.deny_new_usb=1 2> /dev/null"); The GRSECURITY Kernel does not exist anymore!
+
+  // For this method to work alter your /etc/sudoers:
+  // [username] [hostname] =NOPASSWD:
+  // /sbin/sysctl kernel.kernel.deny_new_usb=1
+  system("sudo -n sysctl kernel.deny_new_usb=1 2> /dev/null"); /* FOR THIS TO WORK YOU NEED linux-hardened KERNEL (and active in use)! */
 #if STRICT_USBOFF
-  system("sudo -n sysctl kernel.grsecurity.grsec_lock=1 2> /dev/null");
+  system("sudo -n sysctl kernel.grsecurity.grsec_lock=1 2> /dev/null"); /* The GRSECURITY Kernel does not exist anymore! */
 #endif
 #else
   return;
@@ -250,7 +256,12 @@ usbon(void) {
   // Needs sudo privileges - alter your /etc/sudoers file:
   // [username] [hostname] =NOPASSWD:
   // /sbin/sysctl kernel.grsecurity.deny_new_usb=0
-  system("sudo -n sysctl kernel.grsecurity.deny_new_usb=0 2> /dev/null");
+  //system("sudo -n sysctl kernel.grsecurity.deny_new_usb=0 2> /dev/null"); The GRSECURITY Kernel does not exist anymore!
+
+  // For this method to work alter your /etc/sudoers:
+  // [username] [hostname] =NOPASSWD:
+  // /sbin/sysctl kernel.deny_new_usb=0
+  system("sudo -n sysctl kernel.deny_new_usb=0 2> /dev/null"); /* FOR THIS TO WORK YOU NEED linux-hardened KERNEL (and active in use)! */
 #else
   return;
 #endif
